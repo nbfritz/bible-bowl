@@ -1,11 +1,32 @@
 import type {
-    Game, Category, Question, Bonus, Answer, PlayerPath,
+    Game, Category, Question, Bonus, Answer, PlayerPath, Team, Player,
     QuestionPath, AnswerPath, BonusPath, CategoryPath, TeamPath
 } from './records'
-import { makeCategoryPath, makeQuestionPath, makeBonusPath, makeAnswerPath } from './records'
+import {
+    makeCategoryPath, makeQuestionPath, makeBonusPath,
+    makeAnswerPath, makeTeamPath, makePlayerPath
+} from './records'
 import { List, Seq }  from 'immutable'
 
 export type KeyPath = List<string | number>
+
+export const keyedTeams = (game: Game): Seq.Keyed<TeamPath, Team> =>
+    Seq.Keyed(
+        game.teams.map((team, teamIndex) =>
+            [makeTeamPath({team: teamIndex}), team]
+        )
+    )
+
+export const keyedPlayers = (game: Game, teamPath?: TeamPath): Seq.Keyed<PlayerPath, Player> => (
+    (teamPath ? Seq.Keyed([[teamPath, teamByPath(game, teamPath)]]) : keyedTeams(game))
+        .flatMap((team, tKey) =>
+            team.players.map((player, pIdx) => [
+                makePlayerPath({team: tKey.team, player: pIdx}),
+                player
+            ])
+        )
+        .toKeyedSeq()
+)
 
 export const keyedCategories = (game: Game): Seq.Keyed<CategoryPath, Category> =>
     Seq.Keyed(
@@ -14,13 +35,20 @@ export const keyedCategories = (game: Game): Seq.Keyed<CategoryPath, Category> =
         )
     )
 
-export const keyedQuestions = (game: Game): Seq.Keyed<QuestionPath, Question> =>
-    keyedCategories(game).flatMap((category, cKey) =>
-        category.questions.map((question, qIdx) => [
-            makeQuestionPath({category: cKey.category, question: qIdx}),
-            question
-        ])
-    ).toKeyedSeq()
+export const keyedQuestions = (game: Game, categoryPath?: CategoryPath): Seq.Keyed<QuestionPath, Question> =>
+    (categoryPath ? Seq.Keyed([[categoryPath, categoryByPath(game, categoryPath)]]) : keyedCategories(game))
+        .flatMap((category, cKey) =>
+            category.questions.map((question, qIdx) => [
+                makeQuestionPath({category: cKey.category, question: qIdx}),
+                question
+            ])
+        )
+        .toKeyedSeq()
+
+export const sortedQuestions = (game: Game): Seq.Keyed<QuestionPath, Question> =>
+    keyedQuestions(game)
+        .filter((q) => Boolean(q.number))
+        .sortBy((q) => q.number)
 
 export const keyedAnswers = (game: Game): Seq.Keyed<AnswerPath, Answer> =>
     keyedQuestions(game).flatMap((question, qKey) =>
@@ -50,6 +78,12 @@ export const bonusByPath = (game: Game, path: BonusPath): Bonus =>
 export const categoryByPath = (game: Game, path: CategoryPath | BonusPath | QuestionPath | AnswerPath): Category =>
     game.getIn(categoryKeyPath(path)) as Category
 
+export const teamByPath = (game: Game, path: TeamPath | PlayerPath): Team =>
+    game.getIn(teamKeyPath(path)) as Team
+
+export const playerByPath = (game: Game, path: PlayerPath): Player =>
+    game.getIn(playerKeyPath(path)) as Player
+
 export const categoryKeyPath = (path: CategoryPath | AnswerPath | QuestionPath | BonusPath): KeyPath =>
     List(['categories', path.category])
 
@@ -61,6 +95,12 @@ export const questionKeyPath = (path: QuestionPath | AnswerPath): KeyPath =>
 
 export const answerKeyPath = (path: AnswerPath): KeyPath =>
     List(['categories', path.category, 'questions', path.question, 'answers', path.answer])
+
+export const teamKeyPath = (path: TeamPath | PlayerPath): KeyPath =>
+    List(['teams', path.team])
+
+export const playerKeyPath = (path: PlayerPath): KeyPath =>
+    List(['teams', path.team, 'players', path.player])
 
 export const bonusesForTeam = (game: Game, team: TeamPath): Seq.Keyed<BonusPath, Bonus> =>
     keyedBonuses(game).filter((bonus) => bonus.team.equals(team))

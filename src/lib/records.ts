@@ -3,13 +3,20 @@ import { Record, List } from 'immutable'
 
 type PlayerProps = { name: String }
 export type Player = RecordOf<PlayerProps>
-export const makePlayer: Record.Factory<PlayerProps> = Record({ name: '' })
+export const makePlayer: Record.Factory<PlayerProps> = Record({
+    name: 'Unknown Player'
+})
 
 type TeamProps = { name: String, players: List<Player>}
 export type Team = RecordOf<TeamProps>
 export const makeTeam: Record.Factory<TeamProps> = Record({
-    name: '',
-    players: List(Array.from({ length: 4 }, makePlayer))
+    name: 'Unknown Team',
+    players: List([
+        makePlayer({name: 'Player 1'}),
+        makePlayer({name: 'Player 2'}),
+        makePlayer({name: 'Player 3'}),
+        makePlayer({name: 'Player 4'}),
+    ])
 })
 
 type AnswerProps = { player: PlayerPath, isCorrect: boolean }
@@ -37,7 +44,7 @@ export const makeBonus: Record.Factory<BonusProps> = Record({
 type CategoryProps = { name: string, questions: List<Question>, bonuses: List<Bonus> }
 export type Category = RecordOf<CategoryProps>
 export const makeCategory: Record.Factory<CategoryProps> = Record({
-    name: "",
+    name: 'Unknown Category',
     bonuses: List(),
     questions: List([10, 15, 15, 20].map((value) => makeQuestion({ value }))),
 })
@@ -46,8 +53,17 @@ type GameProps = { questionNumber: number, categories: List<Category>, teams: Li
 export type Game = RecordOf<GameProps>
 export const makeGame: Record.Factory<GameProps> = Record({
     questionNumber: 1,
-    categories: List(Array.from({ length: 5 }, makeCategory)),
-    teams: List(Array.from({ length: 2 }, makeTeam))
+    categories: List([
+        makeCategory({name: 'Category 1'}),
+        makeCategory({name: 'Category 2'}),
+        makeCategory({name: 'Category 3'}),
+        makeCategory({name: 'Category 4'}),
+        makeCategory({name: 'Category 5'}),
+    ]),
+    teams: List([
+        makeTeam({name: 'Team 1'}),
+        makeTeam({name: 'Team 2'}),
+    ])
 })
 
 type CategoryPathProps = { category: number }

@@ -1,6 +1,7 @@
 import { Game, Bonus, Answer, makeBonus, makeAnswer } from './records'
 import type { PlayerPath, QuestionPath, CategoryPath, BonusPath, AnswerPath, TeamPath } from './records'
 import { questionKeyPath, categoryKeyPath } from './query'
+import { pathToCurrentQuestion } from './rules'
 import type { List } from 'immutable'
 
 export const scoreBonus = (
@@ -27,3 +28,6 @@ export const scoreAnswer = (
 
 export const nextQuestion = (game: Game): Game =>
     game.setIn(["questionNumber"], game.questionNumber + 1)
+
+export const selectQuestion = (game: Game, path: QuestionPath): Game =>
+    game.setIn(questionKeyPath(path).push('number'), game.questionNumber)

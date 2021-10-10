@@ -1,6 +1,5 @@
 import * as subj from '../mutations'
 import { makeGame, makePlayerPath, makeQuestionPath, makeCategoryPath, makeTeamPath } from '../records'
-import { List } from 'immutable'
 
 describe('score bonus', () => {
     it('adds a new bonus entry for a category', () => {
@@ -45,5 +44,16 @@ describe('nextQuestion', () => {
         const newGame = subj.nextQuestion(game)
         expect(game.questionNumber).toEqual(1)
         expect(newGame.questionNumber).toEqual(2)
+    })
+})
+
+
+describe('selectQuestion', () => {
+    it('should set the specified question to the current question number', () => {
+        const game = makeGame()
+        const newGame = subj.selectQuestion(game, makeQuestionPath({category: 0, question: 1}))
+
+        expect(game.categories.get(0).questions.get(1).number).toBeNull()
+        expect(newGame.categories.get(0).questions.get(1).number).toEqual(1)
     })
 })

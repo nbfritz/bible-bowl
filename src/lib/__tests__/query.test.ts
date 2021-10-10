@@ -5,6 +5,42 @@ import {
 } from '../records'
 import {List} from 'immutable'
 
+describe('keyedTeams', () => {
+    it('returns all teams in a game', () => {
+        const teams = subj.keyedTeams(makeGame())
+        expect(teams.size).toEqual(2)
+        expect(teams.keySeq().toArray()).toEqual([
+            makeTeamPath({team: 0}),
+            makeTeamPath({team: 1}),
+        ])
+    })
+})
+
+describe('keyedPlayers', () => {
+    it('returns all players in a game', () => {
+        const players = subj.keyedPlayers(makeGame())
+        expect(players.toList().size).toEqual(8)
+        expect(players.keySeq().take(5).toArray()).toEqual([
+            makePlayerPath({team: 0, player: 0}),
+            makePlayerPath({team: 0, player: 1}),
+            makePlayerPath({team: 0, player: 2}),
+            makePlayerPath({team: 0, player: 3}),
+            makePlayerPath({team: 1, player: 0}),
+        ])
+    })
+
+    it('returns all players for a given team if filtered', () => {
+        const players = subj.keyedPlayers(makeGame(), makeTeamPath({team: 1}))
+        expect(players.toList().size).toEqual(4)
+        expect(players.keySeq().toArray()).toEqual([
+            makePlayerPath({team: 1, player: 0}),
+            makePlayerPath({team: 1, player: 1}),
+            makePlayerPath({team: 1, player: 2}),
+            makePlayerPath({team: 1, player: 3})
+        ])
+    })
+})
+
 describe('keyedCategories', () => {
     it('returns all questions in a game', () => {
         const categories = subj.keyedCategories(makeGame())
@@ -37,6 +73,39 @@ describe('keyedQuestions', () => {
             10, 15, 15, 20,
             10, 15, 15, 20,
             10, 15, 15, 20
+        ])
+    })
+
+    it('returns questions for a category if filtered', () => {
+        const questions = subj.keyedQuestions(makeGame(), makeCategoryPath({category: 1}))
+        expect(questions.toList().size).toEqual(4)
+        expect(questions.keySeq().toArray()).toEqual([
+            makeQuestionPath({category: 1, question: 0}),
+            makeQuestionPath({category: 1, question: 1}),
+            makeQuestionPath({category: 1, question: 2}),
+            makeQuestionPath({category: 1, question: 3})
+        ])
+    })
+})
+
+describe('sortedQuestions', () => {
+    it('returns all questions in a game, sorted by question number', () => {
+        const game = makeGame()
+            .setIn(['categories', 0, 'questions', 3, 'number'], 1)
+            .setIn(['categories', 1, 'questions', 2, 'number'], 2)
+            .setIn(['categories', 2, 'questions', 1, 'number'], 3)
+            .setIn(['categories', 3, 'questions', 0, 'number'], 4)
+            .setIn(['categories', 4, 'questions', 3, 'number'], 5)
+            .setIn(['categories', 0, 'questions', 2, 'number'], 6)
+
+        const questions = subj.sortedQuestions(game)
+        expect(questions.keySeq().toArray()).toEqual([
+            makeQuestionPath({category: 0, question: 3}),
+            makeQuestionPath({category: 1, question: 2}),
+            makeQuestionPath({category: 2, question: 1}),
+            makeQuestionPath({category: 3, question: 0}),
+            makeQuestionPath({category: 4, question: 3}),
+            makeQuestionPath({category: 0, question: 2})
         ])
     })
 })
@@ -236,6 +305,34 @@ describe('categoryByPath', () => {
     })
 })
 
+describe('teamByPath', () => {
+    it('returns team if possible', () => {
+        const game = makeGame()
+        const team = game.teams.get(0)
+
+        const path = makeTeamPath({team: 0})
+        expect(subj.teamByPath(game, path)).toEqual(team)
+    })
+
+    it('returns team from PlayerPath if possible', () => {
+        const game = makeGame()
+        const team = game.teams.get(0)
+
+        const path = makePlayerPath({team: 0, player: 0})
+        expect(subj.teamByPath(game, path)).toEqual(team)
+    })
+})
+
+describe('playerByPath', () => {
+    it('returns player if possible', () => {
+        const game = makeGame()
+        const player = game.teams.get(0).players.get(0)
+
+        const path = makePlayerPath({team: 0, player: 0})
+        expect(subj.playerByPath(game, path)).toEqual(player)
+    })
+})
+
 
 describe('categoryKeyPath', () => {
     it('returns an appropriate KeyPath', () => {
@@ -282,5 +379,24 @@ describe('answerKeyPath', () => {
     it('returns an appropriate KeyPath', () => {
         const path = makeAnswerPath({category: 1, question: 2, answer: 3})
         expect(subj.answerKeyPath(path)).toEqual(List(['categories', 1, 'questions', 2, 'answers', 3]))
+    })
+})
+
+describe('teamKeyPath', () => {
+    it('returns an appropriate KeyPath', () => {
+        const path = makeTeamPath({team: 1})
+        expect(subj.teamKeyPath(path)).toEqual(List(['teams', 1]))
+    })
+
+    it('returns an appropriate KeyPath from a PlayerPath', () => {
+        const path = makePlayerPath({team: 1, player: 2})
+        expect(subj.teamKeyPath(path)).toEqual(List(['teams', 1]))
+    })
+})
+
+describe('playerKeyPath', () => {
+    it('returns an appropriate KeyPath', () => {
+        const path = makePlayerPath({team: 1, player: 2})
+        expect(subj.playerKeyPath(path)).toEqual(List(['teams', 1, 'players', 2]))
     })
 })

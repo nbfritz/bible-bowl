@@ -4,15 +4,18 @@ import { List } from 'immutable'
 describe('Player', () => {
     it('initializes with correct defaults', () => {
         const player = subj.makePlayer()
-        expect(player.name).toEqual("")
+        expect(player.name).toEqual('Unknown Player')
     })
 })
 
 describe('Team', () => {
     it('initializes with correct defaults', () => {
         const team = subj.makeTeam()
-        expect(team.name).toEqual("")
+        expect(team.name).toEqual('Unknown Team')
         expect(team.players.size).toEqual(4)
+        expect(team.players.map((p) => p.name).toArray()).toEqual([
+            'Player 1', 'Player 2', 'Player 3', 'Player 4'
+        ])
     })
 })
 
@@ -44,7 +47,7 @@ describe('Bonus', () => {
 describe('Category', () => {
     it('initializes with correct defaults', () => {
         const category = subj.makeCategory()
-        expect(category.name).toEqual("")
+        expect(category.name).toEqual('Unknown Category')
         expect(category.bonuses.size).toEqual(0)
         expect(category.questions.size).toEqual(4)
         expect(category.questions.map((q) => q.value)).toEqual(List([10, 15, 15, 20]))
@@ -54,8 +57,12 @@ describe('Category', () => {
 describe('Game', () => {
     it('initializes with correct defaults', () => {
         const game = subj.makeGame()
-        expect(game.categories.size).toEqual(5)
-        expect(game.teams.size).toEqual(2)
+        expect(game.categories.map((c) => c.name).toArray()).toEqual([
+            'Category 1', 'Category 2', 'Category 3', 'Category 4', 'Category 5'
+        ])
+        expect(game.teams.map((t) => t.name).toArray()).toEqual([
+            'Team 1', 'Team 2'
+        ])
         expect(game.questionNumber).toEqual(1)
     })
 })
