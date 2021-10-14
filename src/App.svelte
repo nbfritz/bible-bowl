@@ -1,11 +1,17 @@
 <script lang="ts">
-	import {makeGame} from './lib/records'
-	import {keyedCategories, keyedPlayers, keyedQuestions, keyedTeams, sortedQuestions, teamByPath} from "./lib/query"
-	import {categoriesNeedingBonus, gameNeedsCategoryChoice, pathToCurrentQuestion, scoreForTeam} from './lib/rules'
-	import {nextQuestion, scoreAnswer, scoreBonus, selectQuestion} from './lib/mutations'
+    import {makeGame, QuestionKey} from './lib/records'
+    import {currentQuestionKey, gameNeedsCategoryChoice} from './lib/rules'
+    import CategoryPicker from "./components/CategoryPicker.svelte";
+    import BonusScorer from "./components/BonusScorer.svelte";
+    import AnswerScorer from "./components/AnswerScorer.svelte";
+    import TeamScores from "./components/TeamScores.svelte";
+    import QuestionFooter from "./components/QuestionFooter.svelte";
+    import ScoreSheet from "./components/ScoreSheet.svelte";
+    import UndoButton from "./components/UndoButton.svelte";
 
-	let game = makeGame()
+    let game = makeGame()
     let history = []
+    let questionKey: QuestionKey
 
     const update = (newGame) => {
         history.push(game)
@@ -13,61 +19,30 @@
     }
     const undo = () => game = history.pop() || makeGame()
 
-    $: currentQuestionPath = pathToCurrentQuestion(game)
+    $: questionKey = currentQuestionKey(game)
 
-    const next = () => update(nextQuestion(game))
-    const score = (category, team, score) => update(scoreBonus(game, category, team, score))
-    const select = (questionPath) => update(selectQuestion(game, questionPath))
-    const answer = (questionPath, playerPath, isCorrect) => update(scoreAnswer(game, questionPath, playerPath, isCorrect))
 </script>
 
 <main>
-    <button on:click={undo}>UNDO</button>
+    <UndoButton {undo} />
 
-    {#each categoriesNeedingBonus(game).toArray() as [cKey, category] }
-        {#each keyedTeams(game).toArray() as [tKey, team]}
-            <p>
-                Bonus for {team.name}:
-                {#each [0, 5, 10, 15, 20] as points}
-                    <button on:click={() => score(cKey, tKey, points)}>{points}</button>
-                {/each}
-            </p>
-        {/each}
-    {/each}
+    <TeamScores {game} />
+
+    <hr>
 
     {#if gameNeedsCategoryChoice(game)}
-        {#each keyedCategories(game).toArray() as [cKey, category]}
-            <p>
-                {category.name}:
-                {#each keyedQuestions(game, cKey).toArray() as [qKey, question]}
-                    <button on:click={() => select(qKey)} disabled={question.number}>{question.value}</button>
-                {/each}
-            </p>
-        {/each}
+        <CategoryPicker {game} {update} />
     {/if}
 
-    {#if currentQuestionPath}
-        {#each keyedTeams(game).toArray() as [tKey, team]}
-            <p>
-                {#each keyedPlayers(game, tKey).toArray() as [pKey, player]}
-                    <button on:click={() => answer(currentQuestionPath, pKey, true)}>{player.name} YES</button>
-                    <button on:click={() => answer(currentQuestionPath, pKey, false)}>{player.name} NO</button>
-                {/each}
-            </p>
-        {/each}
+    {#if !gameNeedsCategoryChoice(game)}
+        {#if questionKey}<AnswerScorer {game} {update} />{/if}
+        <BonusScorer {game} {update} />
+        <QuestionFooter {game} {update} />
     {/if}
 
-    {#each keyedTeams(game).toArray() as [tKey, team]}
-        <p>{teamByPath(game, tKey).name} Score: {scoreForTeam(game, tKey)}</p>
-    {/each}
+    <hr>
 
-    <p>Currently on question {game.questionNumber}
-        <button on:click={next}>NEXT!</button>
-    </p>
-
-    {#each sortedQuestions(game).toArray() as [qKey, question]}
-        <p>{question.number}: {question.value}</p>
-    {/each}
+    <ScoreSheet {game} />
 </main>
 
 <style>

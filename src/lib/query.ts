@@ -1,127 +1,87 @@
 import type {
     Answer,
-    AnswerPath,
+    AnswerKey,
     Bonus,
-    BonusPath,
+    BonusKey,
     Category,
-    CategoryPath,
+    CategoryKey,
     Game,
+    HasCategory,
+    HasQuestion,
+    HasTeam,
+    KeyPath,
     Player,
-    PlayerPath,
+    PlayerKey,
     Question,
-    QuestionPath,
+    QuestionKey,
     Team,
-    TeamPath
-} from './records'
-import {
-    makeAnswerPath,
-    makeBonusPath,
-    makeCategoryPath,
-    makePlayerPath,
-    makeQuestionPath,
-    makeTeamPath
+    TeamKey
 } from './records'
 import {List, Seq} from 'immutable'
 
-export type KeyPath = List<string | number>
-
-export const keyedTeams = (game: Game): Seq.Keyed<TeamPath, Team> =>
+export const keyedTeams = (game: Game): Seq.Keyed<TeamKey, Team> =>
     Seq.Keyed(
-        game.teams.map((team, teamIndex) =>
-            [makeTeamPath({team: teamIndex}), team]
-        )
+        game.teams.map((team, teamIndex) => [[teamIndex], team])
     )
 
-export const keyedPlayers = (game: Game, teamPath?: TeamPath): Seq.Keyed<PlayerPath, Player> => (
-    (teamPath ? Seq.Keyed([[teamPath, teamByPath(game, teamPath)]]) : keyedTeams(game))
-        .flatMap((team, tKey) =>
-            team.players.map((player, pIdx) => [
-                makePlayerPath({team: tKey.team, player: pIdx}),
-                player
-            ])
-        )
+export const keyedPlayers = (game: Game, teamKey?: TeamKey): Seq.Keyed<PlayerKey, Player> => (
+    (teamKey ? Seq.Keyed([[teamKey, teamByKey(game, teamKey)]]) : keyedTeams(game))
+        .flatMap((team: Team, tKey: TeamKey) =>
+            team.players.map((player: Player, pIdx: number) => [[...tKey, pIdx] as PlayerKey, player]))
         .toKeyedSeq()
 )
 
-export const keyedCategories = (game: Game): Seq.Keyed<CategoryPath, Category> =>
+export const keyedCategories = (game: Game): Seq.Keyed<CategoryKey, Category> =>
     Seq.Keyed(
-        game.categories.map((category, categoryIndex) =>
-            [makeCategoryPath({category: categoryIndex}), category]
-        )
+        game.categories.map((category: Category, cIdx: number) => [[cIdx] as CategoryKey, category])
     )
 
-export const keyedQuestions = (game: Game, categoryPath?: CategoryPath): Seq.Keyed<QuestionPath, Question> =>
-    (categoryPath ? Seq.Keyed([[categoryPath, categoryByPath(game, categoryPath)]]) : keyedCategories(game))
-        .flatMap((category, cKey) =>
-            category.questions.map((question, qIdx) => [
-                makeQuestionPath({category: cKey.category, question: qIdx}),
-                question
-            ])
+export const keyedQuestions = (game: Game, categoryKey?: CategoryKey): Seq.Keyed<QuestionKey, Question> =>
+    (categoryKey ? Seq.Keyed([[categoryKey, categoryByKey(game, categoryKey)]]) : keyedCategories(game))
+        .flatMap((category: Category, cKey: CategoryKey) =>
+            category.questions.map((question: Question, qIdx: number) => [[...cKey, qIdx] as QuestionKey, question])
         )
         .toKeyedSeq()
 
-export const sortedQuestions = (game: Game): Seq.Keyed<QuestionPath, Question> =>
+export const sortedQuestions = (game: Game): Seq.Keyed<QuestionKey, Question> =>
     keyedQuestions(game)
-        .filter((q) => Boolean(q.number))
-        .sortBy((q) => q.number)
+        .filter((q: Question) => Boolean(q.number))
+        .sortBy((q: Question) => q.number)
 
-export const keyedAnswers = (game: Game): Seq.Keyed<AnswerPath, Answer> =>
-    keyedQuestions(game).flatMap((question, qKey) =>
-        question.answers.map((answer, aIdx) => [
-            makeAnswerPath({category: qKey.category, question: qKey.question, answer: aIdx}),
-            answer
-        ])
+export const keyedAnswers = (game: Game): Seq.Keyed<AnswerKey, Answer> =>
+    keyedQuestions(game).flatMap((question: Question, qKey: QuestionKey) =>
+        question.answers.map((answer: Answer, aIdx: number) => [[...qKey, aIdx] as AnswerKey, answer])
     ).toKeyedSeq()
 
-export const keyedBonuses = (game: Game): Seq.Keyed<BonusPath, Bonus> =>
-    keyedCategories(game).flatMap((c, cKey) =>
-        c.bonuses.map((bonus, bIdx) => [
-            makeBonusPath({category: cKey.category, bonus: bIdx}),
-            bonus
-        ])
+export const keyedBonuses = (game: Game): Seq.Keyed<BonusKey, Bonus> =>
+    keyedCategories(game).flatMap((category: Category, cKey: CategoryKey) =>
+        category.bonuses.map((bonus: Bonus, bIdx: number) => [[...cKey, bIdx] as BonusKey, bonus])
     ).toKeyedSeq()
 
-export const answerByPath = (game: Game, path: AnswerPath): Answer =>
-    game.getIn(answerKeyPath(path)) as Answer
+const keysToKeyPath = <T>(...propNames: Array<String>) => (key: T): KeyPath =>
+    List(propNames).flatMap((propName: String, idx: number) => [propName, key[idx]])
 
-export const questionByPath = (game: Game, path: QuestionPath | AnswerPath): Question =>
-    game.getIn(questionKeyPath(path)) as Question
+export const categoryKeyToPath = keysToKeyPath<HasCategory>('categories')
+export const bonusKeyToPath = keysToKeyPath<BonusKey>('categories', 'bonuses')
+export const questionKeyToPath = keysToKeyPath<HasQuestion>('categories', 'questions')
+export const answerKeyToPath = keysToKeyPath<AnswerKey>('categories', 'questions', 'answers')
+export const teamKeyToPath = keysToKeyPath<HasTeam>('teams')
+export const playerKeyToPath = keysToKeyPath<PlayerKey>('teams', 'players')
 
-export const bonusByPath = (game: Game, path: BonusPath): Bonus =>
-    game.getIn(bonusKeyPath(path)) as Bonus
+export const answerByKey = (game: Game, key: AnswerKey): Answer => game.getIn(answerKeyToPath(key)) as Answer
+export const questionByKey = (game: Game, key: HasQuestion): Question => game.getIn(questionKeyToPath(key)) as Question
+export const bonusByKey = (game: Game, key: BonusKey): Bonus => game.getIn(bonusKeyToPath(key)) as Bonus
+export const categoryByKey = (game: Game, key: HasCategory): Category => game.getIn(categoryKeyToPath(key)) as Category
+export const teamByKey = (game: Game, key: HasTeam): Team => game.getIn(teamKeyToPath(key)) as Team
+export const playerByKey = (game: Game, key: PlayerKey): Player => game.getIn(playerKeyToPath(key)) as Player
 
-export const categoryByPath = (game: Game, path: CategoryPath | BonusPath | QuestionPath | AnswerPath): Category =>
-    game.getIn(categoryKeyPath(path)) as Category
+export const bonusesForTeam = (game: Game, teamKey: TeamKey): Seq.Keyed<BonusKey, Bonus> =>
+    keyedBonuses(game).filter((bonus: Bonus) => teamKeyToPath(bonus.teamKey).equals(teamKeyToPath(teamKey)))
 
-export const teamByPath = (game: Game, path: TeamPath | PlayerPath): Team =>
-    game.getIn(teamKeyPath(path)) as Team
+export const answersForTeam = (game: Game, teamKey: TeamKey): Seq.Keyed<AnswerKey, Answer> =>
+    keyedAnswers(game).filter((answer: Answer) => teamKeyToPath(answer.playerKey).equals(teamKeyToPath(teamKey)))
 
-export const playerByPath = (game: Game, path: PlayerPath): Player =>
-    game.getIn(playerKeyPath(path)) as Player
+export const answersForPlayer = (game: Game, playerKey: PlayerKey): Seq.Keyed<AnswerKey, Answer> =>
+    keyedAnswers(game).filter((answer: Answer) => playerKeyToPath(answer.playerKey).equals(playerKeyToPath(playerKey)))
 
-export const categoryKeyPath = (path: CategoryPath | AnswerPath | QuestionPath | BonusPath): KeyPath =>
-    List(['categories', path.category])
 
-export const bonusKeyPath = (path: BonusPath): KeyPath =>
-    List(['categories', path.category, 'bonuses', path.bonus])
-
-export const questionKeyPath = (path: QuestionPath | AnswerPath): KeyPath =>
-    List(['categories', path.category, 'questions', path.question])
-
-export const answerKeyPath = (path: AnswerPath): KeyPath =>
-    List(['categories', path.category, 'questions', path.question, 'answers', path.answer])
-
-export const teamKeyPath = (path: TeamPath | PlayerPath): KeyPath =>
-    List(['teams', path.team])
-
-export const playerKeyPath = (path: PlayerPath): KeyPath =>
-    List(['teams', path.team, 'players', path.player])
-
-export const bonusesForTeam = (game: Game, team: TeamPath): Seq.Keyed<BonusPath, Bonus> =>
-    keyedBonuses(game).filter((bonus) => bonus.team.equals(team))
-
-export const answersForTeam = (game: Game, team: TeamPath): Seq.Keyed<AnswerPath, Answer> =>
-    keyedAnswers(game).filter((answer) => answer.player.team === team.team)
-
-export const answersForPlayer = (game: Game, player: PlayerPath): Seq.Keyed<AnswerPath, Answer> =>
-    keyedAnswers(game).filter((answer) => answer.player.equals(player))

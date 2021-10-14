@@ -1,6 +1,18 @@
 import type {RecordOf} from 'immutable'
 import {List, Record} from 'immutable'
 
+export type KeyPath = List<string | number>
+
+export type CategoryKey = [number]
+export type QuestionKey = [number, number]
+export type AnswerKey = [number, number, number]
+export type BonusKey = [number, number]
+export type PlayerKey = [number, number]
+export type TeamKey = [number]
+export type HasCategory = CategoryKey | QuestionKey | AnswerKey | BonusKey
+export type HasQuestion = QuestionKey | AnswerKey
+export type HasTeam = TeamKey | PlayerKey
+
 type PlayerProps = { name: String }
 export type Player = RecordOf<PlayerProps>
 export const makePlayer: Record.Factory<PlayerProps> = Record({
@@ -19,10 +31,10 @@ export const makeTeam: Record.Factory<TeamProps> = Record({
     ])
 })
 
-type AnswerProps = { player: PlayerPath, isCorrect: boolean }
+type AnswerProps = { playerKey: PlayerKey, isCorrect: boolean }
 export type Answer = RecordOf<AnswerProps>
 export const makeAnswer: Record.Factory<AnswerProps> = Record({
-    player: null,
+    playerKey: null,
     isCorrect: null
 })
 
@@ -34,10 +46,10 @@ export const makeQuestion: Record.Factory<QuestionProps> = Record({
     answers: List()
 })
 
-type BonusProps = { team: TeamPath, value: number }
+type BonusProps = { teamKey: TeamKey, value: number }
 export type Bonus = RecordOf<BonusProps>
 export const makeBonus: Record.Factory<BonusProps> = Record({
-    team: null,
+    teamKey: null,
     value: null
 })
 
@@ -58,52 +70,10 @@ export const makeGame: Record.Factory<GameProps> = Record({
         makeCategory({name: 'Category 2'}),
         makeCategory({name: 'Category 3'}),
         makeCategory({name: 'Category 4'}),
-        makeCategory({name: 'Category 5'}),
+        makeCategory({name: 'Category 5'})
     ]),
     teams: List([
         makeTeam({name: 'Team 1'}),
-        makeTeam({name: 'Team 2'}),
+        makeTeam({name: 'Team 2'})
     ])
 })
-
-type CategoryPathProps = { category: number }
-export type CategoryPath = RecordOf<CategoryPathProps>
-export const makeCategoryPath: Record.Factory<CategoryPathProps> = Record({
-    category: null
-})
-
-type BonusPathProps = { category: number, bonus: number }
-export type BonusPath = RecordOf<BonusPathProps>
-export const makeBonusPath: Record.Factory<BonusPathProps> = Record({
-    category: null,
-    bonus: null
-})
-
-type QuestionPathProps = { category: number, question: number }
-export type QuestionPath = RecordOf<QuestionPathProps>
-export const makeQuestionPath: Record.Factory<QuestionPathProps> = Record({
-    category: null,
-    question: null
-})
-
-type AnswerPathProps = { category: number, question: number, answer: number }
-export type AnswerPath = RecordOf<AnswerPathProps>
-export const makeAnswerPath: Record.Factory<AnswerPathProps> = Record({
-    category: null,
-    question: null,
-    answer: null
-})
-
-type TeamPathProps = { team: number }
-export type TeamPath = RecordOf<TeamPathProps>
-export const makeTeamPath: Record.Factory<TeamPathProps> = Record({
-    team: null
-})
-
-type PlayerPathProps = { team: number, player: number }
-export type PlayerPath = RecordOf<PlayerPathProps>
-export const makePlayerPath: Record.Factory<PlayerPathProps> = Record({
-    team: null,
-    player: null
-})
-

@@ -1,32 +1,33 @@
-import type {AnswerPath, BonusPath, CategoryPath, PlayerPath, QuestionPath, TeamPath} from './records'
+import type {HasCategory, HasQuestion, PlayerKey, QuestionKey, TeamKey} from './records'
 import {Answer, Bonus, Game, makeAnswer, makeBonus} from './records'
-import {categoryKeyPath, questionKeyPath} from './query'
+import {categoryKeyToPath, questionKeyToPath} from './query'
 import type {List} from 'immutable'
 
 export const scoreBonus = (
     game: Game,
-    categoryPath: CategoryPath | BonusPath | QuestionPath | AnswerPath,
-    team: TeamPath,
+    categoryKey: HasCategory,
+    teamKey: TeamKey,
     value: number
 ): Game =>
     game.updateIn(
-        categoryKeyPath(categoryPath).push('bonuses'),
-        (b) => (b as List<Bonus>).push(makeBonus({team, value}))
+        categoryKeyToPath(categoryKey).push('bonuses'),
+        (b) => (b as List<Bonus>).push(makeBonus({teamKey, value}))
     )
 
 export const scoreAnswer = (
     game: Game,
-    questionPath: QuestionPath,
-    player: PlayerPath,
+    questionKey: HasQuestion,
+    playerKey: PlayerKey,
     isCorrect: boolean
 ): Game =>
     game.updateIn(
-        questionKeyPath(questionPath).push('answers'),
-        (a) => (a as List<Answer>).push(makeAnswer({player, isCorrect}))
+        questionKeyToPath(questionKey).push('answers'),
+        (a) => (a as List<Answer>).push(makeAnswer({playerKey, isCorrect}))
     )
 
 export const nextQuestion = (game: Game): Game =>
     game.setIn(["questionNumber"], game.questionNumber + 1)
 
-export const selectQuestion = (game: Game, path: QuestionPath): Game =>
-    game.setIn(questionKeyPath(path).push('number'), game.questionNumber)
+export const selectQuestion = (game: Game, questionKey: QuestionKey): Game => {
+    return game.setIn(questionKeyToPath(questionKey).push('number'), game.questionNumber);
+}
