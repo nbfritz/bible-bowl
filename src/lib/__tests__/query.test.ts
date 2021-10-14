@@ -1,7 +1,14 @@
 import * as subj from '../query'
 import {
-    makeGame, makeBonus, makeAnswer, makeCategoryPath, makeTeamPath,
-    makeAnswerPath, makeBonusPath, makeQuestionPath, makePlayerPath
+    makeAnswer,
+    makeAnswerPath,
+    makeBonus,
+    makeBonusPath,
+    makeCategoryPath,
+    makeGame,
+    makePlayerPath,
+    makeQuestionPath,
+    makeTeamPath
 } from '../records'
 import {List} from 'immutable'
 

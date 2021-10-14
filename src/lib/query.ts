@@ -1,12 +1,27 @@
 import type {
-    Game, Category, Question, Bonus, Answer, PlayerPath, Team, Player,
-    QuestionPath, AnswerPath, BonusPath, CategoryPath, TeamPath
+    Answer,
+    AnswerPath,
+    Bonus,
+    BonusPath,
+    Category,
+    CategoryPath,
+    Game,
+    Player,
+    PlayerPath,
+    Question,
+    QuestionPath,
+    Team,
+    TeamPath
 } from './records'
 import {
-    makeCategoryPath, makeQuestionPath, makeBonusPath,
-    makeAnswerPath, makeTeamPath, makePlayerPath
+    makeAnswerPath,
+    makeBonusPath,
+    makeCategoryPath,
+    makePlayerPath,
+    makeQuestionPath,
+    makeTeamPath
 } from './records'
-import { List, Seq }  from 'immutable'
+import {List, Seq} from 'immutable'
 
 export type KeyPath = List<string | number>
 

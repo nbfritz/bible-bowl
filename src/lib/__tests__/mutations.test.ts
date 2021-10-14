@@ -1,5 +1,5 @@
 import * as subj from '../mutations'
-import { makeGame, makePlayerPath, makeQuestionPath, makeCategoryPath, makeTeamPath } from '../records'
+import {makeCategoryPath, makeGame, makePlayerPath, makeQuestionPath, makeTeamPath} from '../records'
 
 describe('score bonus', () => {
     it('adds a new bonus entry for a category', () => {

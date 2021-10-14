@@ -1,6 +1,6 @@
-import { makeAnswer, makeGame, makeBonus, makeQuestionPath, makePlayerPath, makeTeamPath } from '../records'
+import {makeAnswer, makeBonus, makeGame, makePlayerPath, makeQuestionPath, makeTeamPath} from '../records'
 import * as subj from '../rules'
-import { List } from 'immutable'
+import {List} from 'immutable'
 
 describe('scoreForTeam', () => {
     it('should return 0 with no answers', () => {
@@ -12,9 +12,9 @@ describe('scoreForTeam', () => {
 
     it('should return a score with only answers', () => {
         const game = makeGame().setIn(['categories', 0, 'questions', 0, 'answers'], List([
-            makeAnswer({ player: makePlayerPath({team: 0, player: 0}), isCorrect: false }),
-            makeAnswer({ player: makePlayerPath({team: 1, player: 0}), isCorrect: false }),
-            makeAnswer({ player: makePlayerPath({team: 1, player: 1}), isCorrect: true })
+            makeAnswer({player: makePlayerPath({team: 0, player: 0}), isCorrect: false}),
+            makeAnswer({player: makePlayerPath({team: 1, player: 0}), isCorrect: false}),
+            makeAnswer({player: makePlayerPath({team: 1, player: 1}), isCorrect: true})
         ]))
 
         expect(subj.scoreForTeam(game, makeTeamPath({team: 0}))).toEqual(0)
@@ -24,13 +24,13 @@ describe('scoreForTeam', () => {
     it('should return a score with answers and bonuses', () => {
         const game = makeGame()
             .setIn(['categories', 0, 'questions', 0, 'answers'], List([
-                makeAnswer({ player: makePlayerPath({team: 0, player: 0}), isCorrect: false }),
-                makeAnswer({ player: makePlayerPath({team: 1, player: 0}), isCorrect: false }),
-                makeAnswer({ player: makePlayerPath({team: 1, player: 1}), isCorrect: true })
+                makeAnswer({player: makePlayerPath({team: 0, player: 0}), isCorrect: false}),
+                makeAnswer({player: makePlayerPath({team: 1, player: 0}), isCorrect: false}),
+                makeAnswer({player: makePlayerPath({team: 1, player: 1}), isCorrect: true})
             ]))
             .setIn(['categories', 0, 'bonuses'], List([
-                makeBonus({ team: makeTeamPath({team: 0}), value: 10 }),
-                makeBonus({ team: makeTeamPath({team: 1}), value: 15 }),
+                makeBonus({team: makeTeamPath({team: 0}), value: 10}),
+                makeBonus({team: makeTeamPath({team: 1}), value: 15}),
             ]))
 
         expect(subj.scoreForTeam(game, makeTeamPath({team: 0}))).toEqual(10)
@@ -41,14 +41,14 @@ describe('scoreForTeam', () => {
 describe('scoreForPlayer', () => {
     it('should return a score', () => {
         const game = makeGame().setIn(['categories', 0, 'questions', 0, 'answers'], List([
-            makeAnswer({ player: makePlayerPath({team: 0, player: 0}), isCorrect: false }),
-            makeAnswer({ player: makePlayerPath({team: 1, player: 0}), isCorrect: false }),
-            makeAnswer({ player: makePlayerPath({team: 1, player: 1}), isCorrect: true })
+            makeAnswer({player: makePlayerPath({team: 0, player: 0}), isCorrect: false}),
+            makeAnswer({player: makePlayerPath({team: 1, player: 0}), isCorrect: false}),
+            makeAnswer({player: makePlayerPath({team: 1, player: 1}), isCorrect: true})
         ]))
-        .setIn(['categories', 0, 'questions', 1, 'answers'], List([
-            makeAnswer({ player: makePlayerPath({team: 1, player: 0}), isCorrect: false }),
-            makeAnswer({ player: makePlayerPath({team: 0, player: 0}), isCorrect: true })
-        ]))
+            .setIn(['categories', 0, 'questions', 1, 'answers'], List([
+                makeAnswer({player: makePlayerPath({team: 1, player: 0}), isCorrect: false}),
+                makeAnswer({player: makePlayerPath({team: 0, player: 0}), isCorrect: true})
+            ]))
 
         expect(subj.scoreForPlayer(game, makePlayerPath({team: 0, player: 0}))).toEqual(15)
         expect(subj.scoreForPlayer(game, makePlayerPath({team: 1, player: 0}))).toEqual(0)
@@ -78,8 +78,8 @@ describe('categoriesNeedingBonus', () => {
             .setIn(["categories", 0, "questions", 2, "number"], 3)
             .setIn(["categories", 0, "questions", 3, "number"], 4)
             .setIn(["categories", 0, "bonuses"], List([
-                makeBonus({ team: makeTeamPath({team: 0}), value: 10 }),
-                makeBonus({ team: makeTeamPath({team: 1}), value: 10 })
+                makeBonus({team: makeTeamPath({team: 0}), value: 10}),
+                makeBonus({team: makeTeamPath({team: 1}), value: 10})
             ]))
 
         expect(subj.categoriesNeedingBonus(game).toList().size).toEqual(0)

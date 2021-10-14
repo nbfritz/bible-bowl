@@ -1,5 +1,5 @@
-import type { RecordOf } from 'immutable'
-import { Record, List } from 'immutable'
+import type {RecordOf} from 'immutable'
+import {List, Record} from 'immutable'
 
 type PlayerProps = { name: String }
 export type Player = RecordOf<PlayerProps>
@@ -7,7 +7,7 @@ export const makePlayer: Record.Factory<PlayerProps> = Record({
     name: 'Unknown Player'
 })
 
-type TeamProps = { name: String, players: List<Player>}
+type TeamProps = { name: String, players: List<Player> }
 export type Team = RecordOf<TeamProps>
 export const makeTeam: Record.Factory<TeamProps> = Record({
     name: 'Unknown Team',
@@ -46,7 +46,7 @@ export type Category = RecordOf<CategoryProps>
 export const makeCategory: Record.Factory<CategoryProps> = Record({
     name: 'Unknown Category',
     bonuses: List(),
-    questions: List([10, 15, 15, 20].map((value) => makeQuestion({ value }))),
+    questions: List([10, 15, 15, 20].map((value) => makeQuestion({value}))),
 })
 
 type GameProps = { questionNumber: number, categories: List<Category>, teams: List<Team> }

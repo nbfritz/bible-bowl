@@ -1,5 +1,5 @@
 import * as subj from '../records'
-import { List } from 'immutable'
+import {List} from 'immutable'
 
 describe('Player', () => {
     it('initializes with correct defaults', () => {

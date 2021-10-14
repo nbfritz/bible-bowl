@@ -1,8 +1,7 @@
-import { Game, Bonus, Answer, makeBonus, makeAnswer } from './records'
-import type { PlayerPath, QuestionPath, CategoryPath, BonusPath, AnswerPath, TeamPath } from './records'
-import { questionKeyPath, categoryKeyPath } from './query'
-import { pathToCurrentQuestion } from './rules'
-import type { List } from 'immutable'
+import type {AnswerPath, BonusPath, CategoryPath, PlayerPath, QuestionPath, TeamPath} from './records'
+import {Answer, Bonus, Game, makeAnswer, makeBonus} from './records'
+import {categoryKeyPath, questionKeyPath} from './query'
+import type {List} from 'immutable'
 
 export const scoreBonus = (
     game: Game,
@@ -12,7 +11,7 @@ export const scoreBonus = (
 ): Game =>
     game.updateIn(
         categoryKeyPath(categoryPath).push('bonuses'),
-        (b) => (b as List<Bonus>).push(makeBonus({ team, value }))
+        (b) => (b as List<Bonus>).push(makeBonus({team, value}))
     )
 
 export const scoreAnswer = (
@@ -23,7 +22,7 @@ export const scoreAnswer = (
 ): Game =>
     game.updateIn(
         questionKeyPath(questionPath).push('answers'),
-        (a) => (a as List<Answer>).push(makeAnswer({ player, isCorrect }))
+        (a) => (a as List<Answer>).push(makeAnswer({player, isCorrect}))
     )
 
 export const nextQuestion = (game: Game): Game =>
