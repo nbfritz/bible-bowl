@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type {Game} from "../lib/records";
+    import type {Game} from "../lib/types";
     import {nextQuestion} from "../lib/mutations";
     import {categoriesNeedingBonus, currentQuestionKey} from "../lib/rules";
 
@@ -10,7 +10,7 @@
 
     $: shouldBeDisabled = (
        questionKey === undefined
-       || !categoriesNeedingBonus(game).isEmpty()
+       || !(categoriesNeedingBonus(game).length === 0)
     )
 
     const next = () => update(nextQuestion(game))

@@ -1,33 +1,25 @@
-import type {HasCategory, HasQuestion, PlayerKey, QuestionKey, TeamKey} from './records'
-import {Answer, Bonus, Game, makeAnswer, makeBonus} from './records'
-import {categoryKeyToPath, questionKeyToPath} from './query'
-import type {List} from 'immutable'
+import type {HasCategory, HasQuestion, PlayerKey, QuestionKey, TeamKey} from './types'
+import {Game, makeAnswer, makeBonus} from './types'
+import produce from 'immer'
 
-export const scoreBonus = (
-    game: Game,
-    categoryKey: HasCategory,
-    teamKey: TeamKey,
-    value: number
-): Game =>
-    game.updateIn(
-        categoryKeyToPath(categoryKey).push('bonuses'),
-        (b) => (b as List<Bonus>).push(makeBonus({teamKey, value}))
-    )
+export const scoreBonus = (game: Game, categoryKey: HasCategory, teamKey: TeamKey, value: number): Game =>
+    produce(game, draft => {
+        draft.categories[categoryKey[0]].bonuses.push(
+            makeBonus({teamKey, value})
+        )
+    })
 
-export const scoreAnswer = (
-    game: Game,
-    questionKey: HasQuestion,
-    playerKey: PlayerKey,
-    isCorrect: boolean
-): Game =>
-    game.updateIn(
-        questionKeyToPath(questionKey).push('answers'),
-        (a) => (a as List<Answer>).push(makeAnswer({playerKey, isCorrect}))
-    )
+export const scoreAnswer = (game: Game, questionKey: HasQuestion, playerKey: PlayerKey, isCorrect: boolean): Game =>
+    produce(game, draft => {
+        draft.categories[questionKey[0]].questions[questionKey[1]].answers.push(
+            makeAnswer({playerKey, isCorrect})
+        )
+    })
 
 export const nextQuestion = (game: Game): Game =>
-    game.setIn(["questionNumber"], game.questionNumber + 1)
+    produce(game, draft => { draft.questionNumber += 1 })
 
-export const selectQuestion = (game: Game, questionKey: QuestionKey): Game => {
-    return game.setIn(questionKeyToPath(questionKey).push('number'), game.questionNumber);
-}
+export const selectQuestion = (game: Game, questionKey: QuestionKey): Game =>
+    produce(game, draft => {
+        draft.categories[questionKey[0]].questions[questionKey[1]].number = game.questionNumber
+    })

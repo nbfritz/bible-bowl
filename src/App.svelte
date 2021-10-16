@@ -1,5 +1,5 @@
 <script lang="ts">
-    import {makeGame, QuestionKey} from './lib/records'
+    import {makeGame, QuestionKey} from './lib/types'
     import {currentQuestionKey, gameNeedsCategoryChoice} from './lib/rules'
     import CategoryPicker from "./components/CategoryPicker.svelte";
     import BonusScorer from "./components/BonusScorer.svelte";

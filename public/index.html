@@ -11,6 +11,11 @@
 	<link rel='stylesheet' href='./build/bundle.css'>
 
 	<script defer src='./build/bundle.js'></script>
+	<script>
+		// fixes the issue mentioned here: https://github.com/immerjs/immer/issues/557
+		// FIXME: This shouldn't be necessary!
+		let process = { env: { NODE_ENV: "production" } }
+	</script>
 </head>
 
 <body>

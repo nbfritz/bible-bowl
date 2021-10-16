@@ -1,6 +1,5 @@
-import * as subj from '../records'
-import {List} from 'immutable'
-import type {Player, Question} from "../records";
+import * as subj from '../types'
+import {areKeysEqual, getItem, getKey, KeyedTeam, makeTeam, Team} from "../types";
 
 describe('Player', () => {
     it('initializes with correct defaults', () => {
@@ -13,8 +12,8 @@ describe('Team', () => {
     it('initializes with correct defaults', () => {
         const team = subj.makeTeam()
         expect(team.name).toEqual('Unknown Team')
-        expect(team.players.size).toEqual(4)
-        expect(team.players.map((p: Player) => p.name).toArray()).toEqual([
+        expect(team.players.length).toEqual(4)
+        expect(team.players.map((p) => p.name)).toEqual([
             'Player 1', 'Player 2', 'Player 3', 'Player 4'
         ])
     })
@@ -33,7 +32,7 @@ describe('Question', () => {
         const question = subj.makeQuestion()
         expect(question.number).toBeNull()
         expect(question.value).toBeNull()
-        expect(question.answers.size).toEqual(0)
+        expect(question.answers.length).toEqual(0)
     })
 })
 
@@ -49,19 +48,50 @@ describe('Category', () => {
     it('initializes with correct defaults', () => {
         const category = subj.makeCategory()
         expect(category.name).toEqual('Unknown Category')
-        expect(category.bonuses.size).toEqual(0)
-        expect(category.questions.size).toEqual(4)
-        expect(category.questions.map((q: Question) => q.value)).toEqual(List([10, 15, 15, 20]))
+        expect(category.bonuses.length).toEqual(0)
+        expect(category.questions.length).toEqual(4)
+        expect(category.questions.map((q) => q.value)).toEqual([10, 15, 15, 20])
     })
 })
 
 describe('Game', () => {
     it('initializes with correct defaults', () => {
         const game = subj.makeGame()
-        expect(game.categories.map((c) => c.name).toArray()).toEqual([
+        expect(game.categories.map((c) => c.name)).toEqual([
             'Category 1', 'Category 2', 'Category 3', 'Category 4', 'Category 5'
         ])
-        expect(game.teams.map((t) => t.name).toArray()).toEqual(['Team 1', 'Team 2'])
+        expect(game.teams.map((t) => t.name)).toEqual(['Team 1', 'Team 2'])
         expect(game.questionNumber).toEqual(1)
+    })
+})
+
+describe('areKeysEqual', () => {
+    it('compares equal-length keys', () => {
+        expect(areKeysEqual([1, 0], [1, 1])).toBeFalsy()
+        expect(areKeysEqual([1, 1], [1, 1])).toBeTruthy()
+    })
+
+    it('compares undefined keys', () => {
+        expect(areKeysEqual(undefined, [1, 1])).toBeFalsy()
+    })
+
+    it('compares different-length keys to min length', () => {
+        expect(areKeysEqual([1, 0], [1, 1, 0])).toBeFalsy()
+        expect(areKeysEqual([1, 1], [1, 1, 0])).toBeTruthy()
+    })
+})
+
+describe('getKey', () => {
+    it('retrieves the key portion of a KeyedItem', () => {
+        const pair = [[0], makeTeam()] as KeyedTeam
+        expect(getKey(pair)).toEqual([0])
+    })
+})
+
+describe('getItem', () => {
+    it('retrieves the item portion of a KeyedItem', () => {
+        const team = makeTeam()
+        const pair = [[0], team] as KeyedTeam
+        expect(getItem<Team>(pair)).toEqual(team)
     })
 })

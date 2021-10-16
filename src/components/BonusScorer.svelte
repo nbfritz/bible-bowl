@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type {Game} from "../lib/records";
+    import type {Game} from "../lib/types";
     import {scoreBonus} from "../lib/mutations";
     import {keyedTeams} from "../lib/query";
     import {categoriesNeedingBonus} from "../lib/rules";
@@ -11,10 +11,10 @@
 </script>
 
 <main>
-    {#each categoriesNeedingBonus(game).toArray() as [cKey, category] }
-        {#each keyedTeams(game).toArray() as [tKey, team]}
+    {#each categoriesNeedingBonus(game) as [cKey, category] }
+        {#each keyedTeams(game) as [tKey, team]}
+            <h2>Bonus for {team.name}:</h2>
             <p>
-                Bonus for {team.name}:
                 {#each [0, 5, 10, 15, 20] as points}
                     <button on:click={() => score(cKey, tKey, points)}>{points}</button>
                 {/each}
@@ -25,9 +25,11 @@
 
 <style>
     button {
-        width: 3em;
-        height: 3em;
+        width: 15%;
+        height: 2em;
         margin: 0 1em;
         padding: 0.5em;
+        font-size: 1.5em;
+        font-weight: bold;
     }
 </style>

@@ -1,16 +1,15 @@
 <script lang="ts">
-    import type {Game} from "../lib/records";
-    import {nextQuestion} from "../lib/mutations";
+    import type {Game} from "../lib/types";
     import {sortedQuestions} from "../lib/query";
 
     export let game: Game
 </script>
 
 <main>
-    {#each sortedQuestions(game).toArray() as [qKey, question]}
+    {#each sortedQuestions(game) as [qKey, question]}
         <p>
             {question.number}: {question.value}
-            {#each question.answers.toArray() as answer}
+            {#each question.answers as answer}
                 <span>[{answer.playerKey}: {answer.isCorrect ? 'Correct' : 'Incorrect'}]</span>
             {/each}
         </p>

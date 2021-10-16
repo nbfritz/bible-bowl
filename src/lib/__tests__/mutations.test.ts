@@ -1,12 +1,12 @@
 import * as subj from '../mutations'
-import {makeGame} from '../records'
+import {makeGame} from '../types'
 
 describe('score bonus', () => {
     it('adds a new bonus entry for a category', () => {
         const game = makeGame()
         const newGame = subj.scoreBonus(game, [0], [1], 20)
 
-        const bonus = newGame.categories.get(0).bonuses.get(0)
+        const bonus = newGame.categories[0].bonuses[0]
         expect(bonus.teamKey).toEqual([1])
         expect(bonus.value).toEqual(20)
     })
@@ -15,7 +15,7 @@ describe('score bonus', () => {
         const game = makeGame()
         const newGame = subj.scoreBonus(game, [0], [0], 20)
 
-        const bonus = newGame.categories.get(0).bonuses.get(0)
+        const bonus = newGame.categories[0].bonuses[0]
         expect(bonus.teamKey).toEqual([0])
         expect(bonus.value).toEqual(20)
     })
@@ -26,7 +26,7 @@ describe('score answer', () => {
         const game = makeGame()
         const newGame = subj.scoreAnswer(game, [0, 0], [1, 2], true)
 
-        const answer = newGame.categories.get(0).questions.get(0).answers.get(0)
+        const answer = newGame.categories[0].questions[0].answers[0]
         expect(answer.playerKey).toEqual([1, 2])
         expect(answer.isCorrect).toEqual(true)
     })
@@ -47,7 +47,7 @@ describe('selectQuestion', () => {
         const game = makeGame()
         const newGame = subj.selectQuestion(game, [0, 1])
 
-        expect(game.categories.get(0).questions.get(1).number).toBeNull()
-        expect(newGame.categories.get(0).questions.get(1).number).toEqual(1)
+        expect(game.categories[0].questions[1].number).toBeNull()
+        expect(newGame.categories[0].questions[1].number).toEqual(1)
     })
 })
